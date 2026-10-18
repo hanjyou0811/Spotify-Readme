@@ -250,6 +250,23 @@ https://accounts.spotify.com/authorize?client_id={CLIENT_ID}&response_type=code&
 
 ## Customization
 
+### Click to open the current song
+
+Set the image's link to your instance's `/now` endpoint to open the currently
+playing song in Spotify (or the most recently played song when nothing is playing):
+
+```html
+<a href="https://{PA_USERNAME}.pythonanywhere.com/now">
+  <img src="https://{PA_USERNAME}.pythonanywhere.com/?spin=true&theme=dark" alt="Current Spotify Song" />
+</a>
+
+Powered by [Spotify Readme](https://github.com/tthn0/Spotify-Readme).
+```
+
+If no track is available or Spotify authentication fails, the link opens Spotify's
+home page. The destination is resolved when clicked; GitHub's cached image may
+still show an older song.
+
 <ul>
   <li>
     To customize the widget, simply add query parameters to the endpoint. There are many possible combinations! 

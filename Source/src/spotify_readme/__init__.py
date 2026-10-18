@@ -1,10 +1,36 @@
-from flask import Flask, Response
+from flask import Flask, Response, redirect
+from requests.exceptions import RequestException
 
-from spotify_readme.modules.functions import make_link_page, make_svg_widget
+from spotify_readme.modules.environment_variables import ENV_VARS
+from spotify_readme.modules.functions import SpotifyAPI, make_link_page, make_svg_widget
 
 
 def create_app() -> Flask:
     app: Flask = Flask(__name__)
+
+    @app.route("/now")
+    def now() -> Response:
+        """Open the current track, or the most recently played track, in Spotify."""
+        url = "https://open.spotify.com/"
+        spotify_api = SpotifyAPI(
+            client_id=ENV_VARS.CLIENT_ID,
+            client_secret=ENV_VARS.CLIENT_SECRET,
+            refresh_token=ENV_VARS.REFRESH_TOKEN,
+        )
+        try:
+            current = spotify_api.make_request("me/player/currently-playing")
+            track = current.get("item")
+            if not track:
+                recent = spotify_api.make_request("me/player/recently-played?limit=1")
+                items = recent.get("items") or []
+                track = items[0].get("track") if items else None
+            if track and track.get("id"):
+                url = f"https://open.spotify.com/track/{track['id']}"
+        except (RequestException, ValueError):
+            app.logger.warning("Could not retrieve the Spotify track for /now")
+        resp = redirect(url, code=302)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
 
     # @app.route("/link")
     # def link() -> Response:
